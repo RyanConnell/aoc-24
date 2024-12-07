@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/RyanConnell/aoc-24/pkg/parser"
 )
 
 func main() {
-	lines := parser.MustReadFile("input/custom4.txt")
+	lines := parser.MustReadFile("input/input.txt")
 
 	solutionPart1, err := solve(lines)
 	if err != nil {
@@ -164,12 +165,13 @@ func (p *Point) Next(direction int) Point {
 
 func (b *Board) CheckLoopable(p, diversion Point, direction int) bool {
 	key := func(p Point, direction int) string {
-		return fmt.Sprintf("%d-%d-%d", p.X, p.Y, direction)
+		return strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y) + "," + strconv.Itoa(direction)
 	}
 	visited := map[string]struct{}{}
 	last, next := p, p.Next(direction)
 	for {
-		if _, ok := visited[key(next, direction)]; ok {
+		k := key(next, direction)
+		if _, ok := visited[k]; ok {
 			return true
 		}
 		if next.Y < 0 || next.X < 0 {
@@ -188,7 +190,7 @@ func (b *Board) CheckLoopable(p, diversion Point, direction int) bool {
 				return true
 			}
 		}
-		visited[key(next, direction)] = struct{}{}
+		visited[k] = struct{}{}
 		last, next = next, next.Next(direction)
 	}
 }
