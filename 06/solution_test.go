@@ -51,10 +51,16 @@ func TestDay06(t *testing.T) {
 			Expected:    1,
 		},
 		{
+			Description: "Part 2 (custom5)",
+			File:        "custom5.txt",
+			Solution:    solvePart2,
+			Expected:    1,
+		},
+		{
 			Description: "Part 2 (final)",
 			File:        "input.txt",
 			Solution:    solvePart2,
-			Expected:    0, // TODO: Not getting correct answer for this one yet...
+			Expected:    1711,
 		},
 	})
 }

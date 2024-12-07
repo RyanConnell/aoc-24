@@ -162,7 +162,7 @@ func (p *Point) Next(direction int) Point {
 	return next
 }
 
-func (b *Board) CheckLoopable(p Point, direction int) bool {
+func (b *Board) CheckLoopable(p, diversion Point, direction int) bool {
 	key := func(p Point, direction int) string {
 		return fmt.Sprintf("%d-%d-%d", p.X, p.Y, direction)
 	}
@@ -178,7 +178,7 @@ func (b *Board) CheckLoopable(p Point, direction int) bool {
 		if next.Y >= len(b.Points) || next.X >= len(b.Points[next.Y]) {
 			return false
 		}
-		if b.Points[next.Y][next.X].Solid {
+		if b.Points[next.Y][next.X].Solid || (next.X == diversion.X && next.Y == diversion.Y) {
 			direction = (direction + 1) % 4
 			next = last
 			continue
@@ -210,7 +210,7 @@ func movePart2(guard *Point, direction int, board *Board, check bool) bool {
 		// Ensure that we haven't travelled through this point before.
 		if len(board.Points[next.Y][next.X].VisitedDirections) == 0 {
 			if !board.Points[next.Y][next.X].Start {
-				if board.CheckLoopable(*guard, (direction+1)%4) {
+				if board.CheckLoopable(*guard, next, (direction+1)%4) {
 					board.Points[next.Y][next.X].Loopable = true
 				}
 			}
