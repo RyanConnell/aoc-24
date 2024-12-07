@@ -39,57 +39,56 @@ func NewEquation(line string) (Equation, error) {
 	if err != nil {
 		return Equation{}, err
 	}
-	equation := Equation{result: result}
-	for _, part := range parts[1:] {
+	equation := Equation{result: result, fields: make([]int, len(parts)-1)}
+	for i, part := range parts[1:] {
 		field, err := strconv.Atoi(part)
 		if err != nil {
 			return Equation{}, err
 		}
-		equation.fields = append(equation.fields, field)
+		equation.fields[i] = field
 	}
 	return equation, nil
 }
 
-func squashEquation(expected int, parts []int, allowConcat bool) bool {
+func squashEquation(expected int, firstElem int, parts []int, allowConcat bool) bool {
 	if len(parts) == 0 {
-		return expected == 0
+		return expected == firstElem
 	}
-	if len(parts) == 1 {
-		return expected == parts[0]
+	if expected < firstElem {
+		return false
 	}
 
-	// Addition
-	if squashEquation(expected, append([]int{parts[0] + parts[1]}, parts[2:]...), allowConcat) {
+	if squashEquation(expected, firstElem+parts[0], parts[1:], allowConcat) {
 		return true
 	}
-	if squashEquation(expected, append([]int{parts[0] * parts[1]}, parts[2:]...), allowConcat) {
+	if squashEquation(expected, firstElem*parts[0], parts[1:], allowConcat) {
 		return true
 	}
 	if allowConcat {
-		concat, err := strconv.Atoi(fmt.Sprintf("%d%d", parts[0], parts[1]))
-		if err != nil {
-			panic(err)
-		}
-		if squashEquation(expected, append([]int{concat}, parts[2:]...), allowConcat) {
+		concat := concatNums(firstElem, parts[0])
+		if squashEquation(expected, concat, parts[1:], allowConcat) {
 			return true
 		}
 	}
 	return false
 }
 
-func solve(lines []string) (int, error) {
-	var equations []Equation
-	for _, line := range lines {
-		eq, err := NewEquation(line)
-		if err != nil {
-			return 0, err
-		}
-		equations = append(equations, eq)
+func concatNums(left, right int) int {
+	for i := right; i != 0; i /= 10 {
+		left *= 10
 	}
+	return left + right
+}
 
+func solve(lines []string) (int, error) {
+	return solution(lines, false)
+}
+
+func solution(lines []string, allowConcat bool) (int, error) {
 	var sum int
-	for _, eq := range equations {
-		solveable := squashEquation(eq.result, eq.fields, false)
+	for idx := range lines {
+		eq, _ := NewEquation(lines[idx])
+		solveable := squashEquation(eq.result, eq.fields[0], eq.fields[1:], allowConcat)
 		if solveable {
 			sum += eq.result
 		}
@@ -100,21 +99,5 @@ func solve(lines []string) (int, error) {
 /// Part 2 \\\
 
 func solvePart2(lines []string) (int, error) {
-	var equations []Equation
-	for _, line := range lines {
-		eq, err := NewEquation(line)
-		if err != nil {
-			return 0, err
-		}
-		equations = append(equations, eq)
-	}
-
-	var sum int
-	for _, eq := range equations {
-		solveable := squashEquation(eq.result, eq.fields, true)
-		if solveable {
-			sum += eq.result
-		}
-	}
-	return sum, nil
+	return solution(lines, true)
 }
