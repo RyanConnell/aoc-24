@@ -32,7 +32,6 @@ type Point struct {
 func (p Point) Antinodes(target Point) []Point {
 	xDistance := float64(p.X) - float64(target.X)
 	yDistance := float64(p.Y) - float64(target.Y)
-	//fmt.Println(p, target, xDistance, yDistance)
 	return []Point{
 		{
 			X: int(p.X + int(xDistance)),
@@ -45,6 +44,38 @@ func (p Point) Antinodes(target Point) []Point {
 	}
 }
 
+func (p Point) HarmonicAntinodes(target Point, bounds *Point) []Point {
+	xDistance := float64(p.X) - float64(target.X)
+	yDistance := float64(p.Y) - float64(target.Y)
+	var antinodes []Point
+	for i := 0; ; i++ {
+		var added bool
+		pAdj := Point{
+			X: int(p.X + int(xDistance)*i),
+			Y: int(p.Y + int(yDistance)*i),
+		}
+		tAdj := Point{
+			X: int(target.X - int(xDistance)*i),
+			Y: int(target.Y - int(yDistance)*i),
+		}
+		if bounds == nil {
+			return []Point{pAdj, tAdj}
+		}
+		if pAdj.X < bounds.X && pAdj.Y < bounds.Y && pAdj.X >= 0 && pAdj.Y >= 0 {
+			antinodes = append(antinodes, pAdj)
+			added = true
+		}
+		if tAdj.X < bounds.X && tAdj.Y < bounds.Y && tAdj.X >= 0 && tAdj.Y >= 0 {
+			antinodes = append(antinodes, tAdj)
+			added = true
+		}
+		if !added {
+			break
+		}
+	}
+	return antinodes
+}
+
 func (p Point) String() string {
 	return strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y)
 }
@@ -52,8 +83,11 @@ func (p Point) String() string {
 /// Part 1 \\\
 
 func solve(lines []string) (int, error) {
+	return solution(lines, false)
+}
+
+func solution(lines []string, allowHarmonics bool) (int, error) {
 	nodesPerChar := make(map[rune][]Point)
-	antinodes := make(map[string]Point)
 	for y, line := range lines {
 		for x, char := range line {
 			if char != '.' {
@@ -62,45 +96,32 @@ func solve(lines []string) (int, error) {
 		}
 	}
 
+	antinodeSet := make(map[string]Point)
 	for _, nodes := range nodesPerChar {
 		for i, node := range nodes {
 			for _, target := range nodes[i+1:] {
-				for _, anode := range node.Antinodes(target) {
+				var antinodes []Point
+				if allowHarmonics {
+					antinodes = node.HarmonicAntinodes(target,
+						&Point{X: len(lines[0]), Y: len(lines)})
+				} else {
+					antinodes = node.Antinodes(target)
+				}
+				for _, anode := range antinodes {
 					if anode.X < 0 || anode.Y < 0 || anode.X >= len(lines[0]) || anode.Y >= len(lines) {
 						continue
 					}
-					antinodes[anode.String()] = anode
+					antinodeSet[anode.String()] = anode
 				}
 			}
 		}
 	}
 
-	return len(antinodes), nil
-}
-
-func printMap(lines []string, antinodes map[string]Point) {
-	m := make([][]rune, len(lines))
-	for y, line := range lines {
-		m[y] = make([]rune, len(line))
-		for x, char := range line {
-			m[y][x] = char
-		}
-	}
-
-	for _, point := range antinodes {
-		m[point.Y][point.X] = '#'
-	}
-	for _, line := range m {
-		for _, char := range line {
-			fmt.Print(string(char), " ")
-		}
-		fmt.Println()
-	}
-	fmt.Println()
+	return len(antinodeSet), nil
 }
 
 /// Part 2 \\\
 
 func solvePart2(lines []string) (int, error) {
-	return 0, nil
+	return solution(lines, true)
 }

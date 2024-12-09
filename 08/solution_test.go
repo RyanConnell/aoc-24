@@ -14,5 +14,23 @@ func TestDay08(t *testing.T) {
 			Solution:    solve,
 			Expected:    14,
 		},
+		{
+			Description: "Part 1 (final)",
+			File:        "input.txt",
+			Solution:    solve,
+			Expected:    280,
+		},
+		{
+			Description: "Part 2 (sample)",
+			File:        "sample.txt",
+			Solution:    solvePart2,
+			Expected:    34,
+		},
+		{
+			Description: "Part 2 (input)",
+			File:        "input.txt",
+			Solution:    solvePart2,
+			Expected:    958,
+		},
 	})
 }
