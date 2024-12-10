@@ -15,9 +15,13 @@ type TestCase[V comparable] struct {
 }
 
 func TimeAndCheck[V comparable](day int, cases []TestCase[V]) {
-	fmt.Println("|=====================================================|")
+	fmt.Println("|=========================================================|")
 	for _, tc := range cases {
-		lines := parser.MustReadFile(fmt.Sprintf("input/%s", tc.File))
+		lines, ok := parser.ReadFile(fmt.Sprintf("input/%s", tc.File))
+		if !ok && tc.File == "input.txt" {
+			fmt.Printf("| Day %02d | %-20s| %-24s |\n", day, tc.Description, "skipped: FileNotFound")
+			continue
+		}
 
 		start := time.Now()
 		result, err := tc.Solution(lines)
@@ -32,7 +36,7 @@ func TimeAndCheck[V comparable](day int, cases []TestCase[V]) {
 			message = fmt.Sprintf("took %s", duration)
 		}
 
-		fmt.Printf("| Day %02d | %-20s| %-20s |\n", day, tc.Description, message)
+		fmt.Printf("| Day %02d | %-20s| %-24s |\n", day, tc.Description, message)
 	}
-	fmt.Println("|=====================================================|")
+	fmt.Println("|=========================================================|")
 }
