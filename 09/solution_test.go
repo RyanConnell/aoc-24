@@ -20,5 +20,17 @@ func TestDay09(t *testing.T) {
 			Solution:    solve,
 			Expected:    6299243228569,
 		},
+		{
+			Description: "Part 2 (sample)",
+			File:        "sample.txt",
+			Solution:    solvePart2,
+			Expected:    2858,
+		},
+		{
+			Description: "Part 2 (input)",
+			File:        "input.txt",
+			Solution:    solvePart2,
+			Expected:    6326952672104,
+		},
 	})
 }
