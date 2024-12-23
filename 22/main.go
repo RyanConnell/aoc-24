@@ -56,7 +56,6 @@ func cost(n int) int {
 var cache = make(map[int]int)
 
 func iterate(number, iterations int) (int, []int) {
-
 	costs := make([]int, iterations)
 	for i := 0; i < iterations; i++ {
 		if result, ok := cache[number]; ok {
@@ -97,38 +96,29 @@ func solvePart2(lines []string) (int, error) {
 		costsPerBuyer[secret] = costs
 	}
 
-	uniqueKeys := make(map[string]struct{})
-	runsPerBuyer := make(map[int]map[string]int)
+	perKey := make(map[string]int)
 	for secret, costs := range costsPerBuyer {
+		uniqueKeys := make(map[string]struct{})
 		diff := make([]int, len(costs))
 		diff[0] = costs[0] - cost(secret)
 		for i := 1; i < len(costs); i++ {
 			diff[i] = costs[i] - costs[i-1]
 		}
 
-		runs := make(map[string]int)
 		for i := 0; i < len(costs)-3; i++ {
 			key := makeKey(diff[i : i+4])
-			if _, ok := runs[key]; ok {
+			if _, ok := uniqueKeys[key]; ok {
 				// We have already seen this run before, so we can't check it again
 				// since monkeys buy the moment they see the run.
 				continue
 			}
-			runs[key] = costs[i+3]
 			uniqueKeys[key] = struct{}{}
+			perKey[key] += costs[i+3]
 		}
-		runsPerBuyer[secret] = runs
 	}
 
 	var best int
-	for key := range uniqueKeys {
-		var sum int
-		for _, runs := range runsPerBuyer {
-			c, ok := runs[key]
-			if ok {
-				sum += c
-			}
-		}
+	for _, sum := range perKey {
 		if sum > best {
 			best = sum
 		}
